@@ -7,8 +7,13 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
 @Database(
-        entities = {ScheduleEventEntity.class, MemoEntity.class},
-        version = 2,
+        entities = {
+            ScheduleEventEntity.class,
+            MemoEntity.class,
+            UserEntity.class,
+            ConversationHistoryEntity.class
+        },
+        version = 3,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -17,6 +22,10 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract ScheduleEventDao scheduleEventDao();
 
     public abstract MemoDao memoDao();
+
+    public abstract UserDao userDao();
+
+    public abstract ConversationHistoryDao conversationHistoryDao();
 
     public static AppDatabase get(Context context) {
         if (INSTANCE != null) return INSTANCE;

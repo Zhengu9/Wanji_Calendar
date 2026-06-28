@@ -27,4 +27,12 @@ public interface MemoDao {
 
     @Delete
     void delete(MemoEntity memo);
+
+    // ===== 搜索（方案A新增） =====
+
+    @Query("SELECT * FROM memos WHERE title LIKE '%' || :keyword || '%' OR content LIKE '%' || :keyword || '%' ORDER BY updatedAt DESC")
+    List<MemoEntity> searchByKeyword(String keyword);
+
+    @Query("DELETE FROM memos WHERE id = :id")
+    void deleteById(long id);
 }

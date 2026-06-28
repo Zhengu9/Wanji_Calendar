@@ -30,6 +30,29 @@ class ChronoSyncApp : Application() {
 
 		lateinit var chronoSyncApi: ChronoSyncApi
 			private set
+
+		// ===== 本地用户管理（方案A） =====
+		fun getCurrentUserId(): Long = prefs.getLong("currentUserId", -1)
+		fun getCurrentUsername(): String = prefs.getString("currentUsername", "") ?: ""
+		fun getCurrentRole(): String = prefs.getString("currentRole", "user") ?: "user"
+		fun isLoggedIn(): Boolean = getCurrentUserId() > 0
+		fun isAdmin(): Boolean = getCurrentRole() == "admin"
+
+		fun setCurrentUser(userId: Long, username: String, role: String) {
+			prefs.edit()
+				.putLong("currentUserId", userId)
+				.putString("currentUsername", username)
+				.putString("currentRole", role)
+				.apply()
+		}
+
+		fun logout() {
+			prefs.edit()
+				.remove("currentUserId")
+				.remove("currentUsername")
+				.remove("currentRole")
+				.apply()
+		}
 	}
 
 	override fun onCreate() {

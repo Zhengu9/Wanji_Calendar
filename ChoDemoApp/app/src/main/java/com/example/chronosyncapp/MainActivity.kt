@@ -121,6 +121,7 @@ class MainActivity : AppCompatActivity() {
 	private lateinit var rejectSuggestionButton: View
 	private var isWaitingForSuggestionConfirm = false
 	private lateinit var db: AppDatabase
+	private lateinit var kimiAgent: com.example.chronosyncapp.agent.KimiAgentService
 	private lateinit var eventDao: ScheduleEventDao
 	private lateinit var memoDao: MemoDao
 	private var markersByDate: Map<LocalDate, List<EventMarker>> = emptyMap()
@@ -132,26 +133,42 @@ class MainActivity : AppCompatActivity() {
 	private var syncedFromServer: Boolean = false
 	private val hhmmFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.US)
 
-	private fun getAccessToken(): String? = ChronoSyncApp.prefs.getString("access_token", null)
-	private fun setAccessToken(token: String?) {
-		ChronoSyncApp.prefs.edit().putString("access_token", token).apply()
-	}
+	// ===== 本地用户管理（方案A） =====
+	private fun getCurrentUserId(): Long = ChronoSyncApp.getCurrentUserId()
+	private fun getCurrentUsername(): String = ChronoSyncApp.getCurrentUsername()
+	private fun getCurrentRole(): String = ChronoSyncApp.getCurrentRole()
+	private fun isLoggedIn(): Boolean = ChronoSyncApp.isLoggedIn()
+	private fun isAdmin(): Boolean = ChronoSyncApp.isAdmin()
 
-	private fun isLoggedIn(): Boolean = !getAccessToken().isNullOrBlank()
+	private fun doLogout() {
+		ChronoSyncApp.logout()
+		val intent = android.content.Intent(this, LoginActivity::class.java)
+		startActivityForResult(intent, LoginActivity.REQUEST_CODE)
+	}
 	
 	private fun updateLoginStatusUI() {
-		// 更新登录状态图标
 		if (::loginStatusImage.isInitialized) {
 			if (isLoggedIn()) {
-				// 已登录 - 使用亮色图标
 				loginStatusImage.setImageResource(R.drawable.ic_tab_assistant)
 				loginStatusImage.alpha = 1.0f
-				loginStatusImage.contentDescription = "已登录，点击退出"
+				loginStatusImage.contentDescription = "已登录（${getCurrentUsername()}），点击退出"
 			} else {
-				// 未登录 - 使用灰色图标提示
 				loginStatusImage.setImageResource(R.drawable.ic_tab_assistant)
 				loginStatusImage.alpha = 0.5f
 				loginStatusImage.contentDescription = "未登录，点击登录"
+			}
+		}
+	}
+
+	override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
+		super.onActivityResult(requestCode, resultCode, data)
+		if (requestCode == LoginActivity.REQUEST_CODE && resultCode == RESULT_OK) {
+			updateLoginStatusUI()
+			toast("欢迎，${ChronoSyncApp.getCurrentUsername()}")
+			lifecycleScope.launch {
+				refreshMarkers()
+				refreshMemos()
+				onDateSelected(beijingToday())
 			}
 		}
 	}
@@ -480,27 +497,17 @@ class MainActivity : AppCompatActivity() {
 		loginStatusImage = findViewById(R.id.loginStatusImage)
 		loginStatusImage.setOnClickListener {
 			if (isLoggedIn()) {
-				// 已登录，显示退出确认
 				AlertDialog.Builder(this)
 					.setTitle("退出登录")
-					.setMessage("确定要退出当前账号吗？")
+					.setMessage("确定要退出当前账号（${getCurrentUsername()}）吗？")
 					.setPositiveButton("退出") { _, _ ->
-						setAccessToken(null)
-						updateLoginStatusUI()
-						toast("已退出登录")
-						lifecycleScope.launch {
-							refreshMemos()
-							selectedDate?.let { refreshEventsForDate(it) }
-						}
+						doLogout()
 					}
 					.setNegativeButton("取消", null)
 					.show()
 			} else {
-				// 未登录，显示登录对话框
-				showAuthDialog {
-					updateLoginStatusUI()
-					toast("登录成功")
-				}
+				val intent = android.content.Intent(this, LoginActivity::class.java)
+				startActivityForResult(intent, LoginActivity.REQUEST_CODE)
 			}
 		}
 		updateLoginStatusUI()
@@ -552,6 +559,7 @@ class MainActivity : AppCompatActivity() {
 		db = AppDatabase.get(this)
 		eventDao = db.scheduleEventDao()
 		memoDao = db.memoDao()
+		kimiAgent = com.example.chronosyncapp.agent.KimiAgentService.create(db)
 
 		findViewById<View>(R.id.prevMonthImage).setOnClickListener {
 			calendarView.findFirstVisibleMonth()?.let {
@@ -649,18 +657,17 @@ class MainActivity : AppCompatActivity() {
 
 		setupCalendar()
 
+		// ===== 方案A：检查本地登录状态 =====
+		if (!isLoggedIn()) {
+			val intent = android.content.Intent(this, LoginActivity::class.java)
+			startActivityForResult(intent, LoginActivity.REQUEST_CODE)
+			return
+		}
+
 		lifecycleScope.launch {
-			val token = getAccessToken()
-			android.util.Log.d("SyncDebug", "onCreate: token=${token?.take(10)}...")
-			if (!token.isNullOrBlank()) {
-				withContext(Dispatchers.IO) {
-					runCatching { forceSyncFromServer() }
-				}
-			}
 			refreshMarkers()
 			refreshMemos()
 			onDateSelected(beijingToday())
-			android.util.Log.d("SyncDebug", "onCreate: initialization completed")
 		}
 	}
 
@@ -1312,88 +1319,69 @@ class MainActivity : AppCompatActivity() {
 		assistantSendButton.setOnClickListener {
 			val text = assistantInput.text?.toString()?.trim().orEmpty()
 			if (text.isBlank()) return@setOnClickListener
-			
-			val token = getAccessToken()
-			if (token.isNullOrBlank()) {
-				showAuthDialog {
-					assistantSendButton.performClick()
-				}
+
+			if (!isLoggedIn()) {
+				val intent = android.content.Intent(this, LoginActivity::class.java)
+				startActivityForResult(intent, LoginActivity.REQUEST_CODE)
 				return@setOnClickListener
 			}
-			
-			sendMessage(token, text)
+
+			sendMessage(text)
 		}
-		
-		// 页面加载时加载对话历史
+
+		// 页面加载时从Room加载对话历史
 		lifecycleScope.launch {
-			val token = getAccessToken()
-			if (!token.isNullOrBlank()) {
-				loadConversationHistory(token)
+			if (isLoggedIn()) {
+				loadLocalConversationHistory()
 			}
 		}
 	}
 	
-	private fun sendMessage(token: String, text: String, isConfirm: Boolean = false) {
-		// 如果正在等待建议确认，且用户没有点击按钮，则隐藏建议布局
+	private fun sendMessage(text: String, isConfirm: Boolean = false) {
 		if (isWaitingForSuggestionConfirm && !isConfirm) {
 			hideSuggestionLayout()
 		}
-		
-		// 添加到对话列表（用户消息）
+
 		if (!isConfirm) {
 			conversationAdapter.addMessage(ConversationMessage.User(text))
 			scrollToBottom()
 		}
-		
+
 		val assistantInput = findViewById<EditText>(R.id.assistantInput)
 		assistantInput.setText("")
 		assistantInput.isEnabled = false
-		
+
 		lifecycleScope.launch {
-			val result = withContext(Dispatchers.IO) {
-				runCatching { ChronoSyncApp.chronoSyncApi.processAgent(token, text) }
-			}
-			
-			assistantInput.isEnabled = true
-			
-			val resp = result.getOrNull()
-			if (resp != null) {
-				val reply = resp.reply.ifBlank { "（空回复）" }
-				conversationAdapter.addMessage(ConversationMessage.Assistant(reply))
-				scrollToBottom()
-				
-				// 如果AI创建/更新/删除了日程，提示用户（切换回日历时自动刷新）
-				if (resp.entity == "event" && 
-				    (resp.action == "create" || resp.action == "update" || resp.action == "delete")) {
-					toast("日程已更新，请查看日历")
-				}
-				
-				// 检测是否需要建议确认（只检测特定关键词组合）
-				if (needsSuggestionConfirmation(reply)) {
-					showSuggestionLayout(reply)
-				}
-			} else {
-				val exception = result.exceptionOrNull()!!
-				val apiEx = exception as? ChronoSyncApi.ApiException
-				
-				if (apiEx != null && apiEx.code == 401) {
-					// 登录过期，显示错误消息并弹出登录框
-					conversationAdapter.addMessage(ConversationMessage.Assistant("登录已过期，请重新登录"))
-					scrollToBottom()
-					handleApiError(exception)
-				} else {
-					val error = "请求失败：${formatChronoSyncError(exception)}"
-					conversationAdapter.addMessage(ConversationMessage.Assistant(error))
-					scrollToBottom()
+			val result = kimiAgent.processUserMessage(getCurrentUserId(), text)
+
+			withContext(Dispatchers.Main) {
+				assistantInput.isEnabled = true
+
+				when (result) {
+					is com.example.chronosyncapp.agent.KimiAgentService.AgentResult.Reply -> {
+						conversationAdapter.addMessage(ConversationMessage.Assistant(result.text))
+						scrollToBottom()
+						if (needsSuggestionConfirmation(result.text)) {
+							showSuggestionLayout(result.text)
+						}
+					}
+					is com.example.chronosyncapp.agent.KimiAgentService.AgentResult.Error -> {
+						conversationAdapter.addMessage(ConversationMessage.Assistant("抱歉：${result.message}"))
+						scrollToBottom()
+					}
+					is com.example.chronosyncapp.agent.KimiAgentService.AgentResult.ScheduleChanged -> {
+						conversationAdapter.addMessage(ConversationMessage.Assistant(result.reply))
+						scrollToBottom()
+						toast("日程已更新，请查看日历")
+					}
 				}
 			}
 		}
 	}
 	
 	private fun sendConfirmation(confirmText: String) {
-		val token = getAccessToken() ?: return
 		hideSuggestionLayout()
-		sendMessage(token, confirmText, isConfirm = true)
+		sendMessage(confirmText, isConfirm = true)
 	}
 	
 	private fun needsSuggestionConfirmation(reply: String): Boolean {
@@ -1425,50 +1413,25 @@ class MainActivity : AppCompatActivity() {
 	}
 	
 	private fun clearConversationHistory() {
-		val token = getAccessToken() ?: return
 		lifecycleScope.launch {
-			val result = withContext(Dispatchers.IO) {
-				runCatching { ChronoSyncApp.chronoSyncApi.clearAgentConversations(token) }
-			}
-			
-			if (result.isSuccess) {
-				conversationAdapter.clear()
-				val resp = result.getOrNull()
-				toast("已清空 ${resp?.deletedCount ?: 0} 条对话")
-			} else {
-				handleApiError(result.exceptionOrNull()!!)
-			}
+			withContext(Dispatchers.IO) { db.conversationHistoryDao().deleteAll() }
+			conversationAdapter.clear()
+			toast("已清空对话记录")
 		}
 	}
-	
-	private suspend fun loadConversationHistory(token: String) {
-		val result = withContext(Dispatchers.IO) {
-			runCatching { 
-				ChronoSyncApp.chronoSyncApi.getAgentConversations(token, limit = 50) 
-			}
+
+	private suspend fun loadLocalConversationHistory() {
+		val history = withContext(Dispatchers.IO) {
+			db.conversationHistoryDao().getRecent(50)
 		}
-		
-		if (result.isSuccess) {
-			result.getOrNull()?.let { list ->
-				// 按时间正序显示（旧的在上，新的在下）
-				val messages = list.items.reversed().map { conv ->
-					if (conv.role == "user") {
-						ConversationMessage.User(conv.content)
-					} else {
-						ConversationMessage.Assistant(conv.content)
-					}
-				}
-				conversationAdapter.setMessages(messages)
-				scrollToBottom()
+		val messages = history
+			.filter { it.role == "user" || it.role == "assistant" }
+			.map { conv ->
+				if (conv.role == "user") ConversationMessage.User(conv.content)
+				else ConversationMessage.Assistant(conv.content)
 			}
-		} else {
-			val exception = result.exceptionOrNull()!!
-			val apiEx = exception as? ChronoSyncApi.ApiException
-			if (apiEx != null && apiEx.code == 401) {
-				handleApiError(exception)
-			}
-			// 加载失败不显示错误，静默处理
-		}
+		conversationAdapter.setMessages(messages)
+		scrollToBottom()
 	}
 	
 	private fun scrollToBottom() {
