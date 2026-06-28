@@ -512,6 +512,18 @@ class MainActivity : AppCompatActivity() {
 		}
 		updateLoginStatusUI()
 
+		// 搜索按钮
+		findViewById<View>(R.id.searchButton)?.setOnClickListener {
+			startActivity(android.content.Intent(this, SearchActivity::class.java))
+		}
+		// 管理员入口（仅admin可见）
+		findViewById<View>(R.id.adminButton)?.apply {
+			visibility = if (isAdmin()) View.VISIBLE else View.GONE
+			setOnClickListener {
+				startActivity(android.content.Intent(this@MainActivity, AdminDashboardActivity::class.java))
+			}
+		}
+
 		// 初始化 LynxView 并渲染 learnDemo.lynx.bundle
 		val lynxContainer = findViewById<android.widget.FrameLayout>(R.id.lynxContainer)
 		val viewBuilder = LynxViewBuilder().apply {
@@ -560,6 +572,7 @@ class MainActivity : AppCompatActivity() {
 		eventDao = db.scheduleEventDao()
 		memoDao = db.memoDao()
 		kimiAgent = com.example.chronosyncapp.agent.KimiAgentService.create(db)
+		com.example.chronosyncapp.util.NotificationHelper.createChannel(this)
 
 		findViewById<View>(R.id.prevMonthImage).setOnClickListener {
 			calendarView.findFirstVisibleMonth()?.let {
@@ -1700,6 +1713,13 @@ class MainActivity : AppCompatActivity() {
 						refreshMarkers()
 						refreshEventsForDate(date)
 						toast("日程已保存")
+						// 设置日程提醒（方案A - 广播加分项）
+						val saved = eventDao.getEventsForDate(date.toString()).lastOrNull()
+						if (saved != null) {
+							com.example.chronosyncapp.receiver.ScheduleReminderReceiver.scheduleReminder(
+								this@MainActivity, saved.id, saved.date, saved.startTime, saved.title
+							)
+						}
 					} catch (e: Exception) {
 						handleApiError(e)
 					}
@@ -1716,6 +1736,9 @@ class MainActivity : AppCompatActivity() {
 							if (!token.isNullOrBlank() && !serverId.isNullOrBlank()) {
 								runCatching { ChronoSyncApp.chronoSyncApi.deleteEvent(token, serverId) }
 						}
+						com.example.chronosyncapp.receiver.ScheduleReminderReceiver.cancelReminder(
+							this@MainActivity, existing.id
+						)
 						eventDao.delete(existing)
 					}
 					refreshMarkers()

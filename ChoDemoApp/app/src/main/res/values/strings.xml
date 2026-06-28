@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">ChronoSyncApp</string>
+    <string name="app_name">万机日历</string>
+    <string name="channel_reminder_name">日程提醒</string>
+    <string name="channel_reminder_desc">日程开始前的提醒通知</string>
 </resources>

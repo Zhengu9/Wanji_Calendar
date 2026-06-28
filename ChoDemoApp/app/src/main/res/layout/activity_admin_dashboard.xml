@@ -3,12 +3,163 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
-    <TextView
-        android:layout_width="wrap_content"
+    android:padding="16dp"
+    android:background="#FAFAFA">
+
+    <!-- 标题栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/adminBackButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:text="←"
+            android:textSize="20sp"
+            style="@style/Widget.Material3.Button.TextButton" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="管理员仪表盘"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#1A1A1A" />
+    </LinearLayout>
+
+    <!-- 统计卡片 -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="管理员仪表盘 - 阶段5实现"
-        android:textSize="18sp"
-        android:layout_gravity="center"
-        android:layout_marginTop="100dp" />
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            app:cardElevation="2dp"
+            app:cardCornerRadius="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="12dp">
+                <TextView
+                    android:id="@+id/statUsers"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textSize="32sp"
+                    android:textStyle="bold"
+                    android:textColor="#1976D2" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="用户数"
+                    android:textSize="13sp"
+                    android:textColor="#666666" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            app:cardElevation="2dp"
+            app:cardCornerRadius="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="12dp">
+                <TextView
+                    android:id="@+id/statEvents"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textSize="32sp"
+                    android:textStyle="bold"
+                    android:textColor="#388E3C" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="日程数"
+                    android:textSize="13sp"
+                    android:textColor="#666666" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            app:cardElevation="2dp"
+            app:cardCornerRadius="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="12dp">
+                <TextView
+                    android:id="@+id/statMemos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textSize="32sp"
+                    android:textStyle="bold"
+                    android:textColor="#F57C00" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="备忘录"
+                    android:textSize="13sp"
+                    android:textColor="#666666" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </LinearLayout>
+
+    <!-- 类型分布 -->
+    <TextView
+        android:id="@+id/statTypeDistribution"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="日程类型分布："
+        android:textSize="14sp"
+        android:textColor="#333333"
+        android:padding="8dp"
+        android:background="#FFFFFF"
+        android:layout_marginBottom="8dp" />
+
+    <!-- 最近日程 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="最近日程："
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:textColor="#1A1A1A"
+        android:layout_marginBottom="8dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/adminEventList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
 </LinearLayout>

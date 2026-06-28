@@ -50,10 +50,37 @@
 				tools:text="April 2018" />
 
 			<ImageView
+				android:id="@+id/adminButton"
+				android:layout_width="36dp"
+				android:layout_height="36dp"
+				android:layout_marginEnd="4dp"
+				android:background="?attr/selectableItemBackgroundBorderless"
+				android:contentDescription="管理员"
+				android:visibility="gone"
+				app:tint="#FFD700"
+				app:layout_constraintBottom_toBottomOf="parent"
+				app:layout_constraintEnd_toStartOf="@id/searchButton"
+				app:layout_constraintTop_toTopOf="parent"
+				app:srcCompat="@drawable/ic_tab_memo" />
+
+			<ImageView
+				android:id="@+id/searchButton"
+				android:layout_width="36dp"
+				android:layout_height="36dp"
+				android:layout_marginEnd="4dp"
+				android:background="?attr/selectableItemBackgroundBorderless"
+				android:contentDescription="搜索"
+				app:tint="@android:color/white"
+				app:layout_constraintBottom_toBottomOf="parent"
+				app:layout_constraintEnd_toStartOf="@id/loginStatusImage"
+				app:layout_constraintTop_toTopOf="parent"
+				app:srcCompat="@drawable/ic_add" />
+
+			<ImageView
 				android:id="@+id/loginStatusImage"
 				android:layout_width="36dp"
 				android:layout_height="36dp"
-				android:layout_marginEnd="8dp"
+				android:layout_marginEnd="4dp"
 				android:background="?attr/selectableItemBackgroundBorderless"
 				android:contentDescription="登录状态"
 				app:tint="@android:color/white"

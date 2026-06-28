@@ -2,13 +2,82 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:orientation="vertical">
+
+    <!-- 顶部搜索栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:background="#FFFFFF"
+        android:elevation="4dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/searchBackButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:text="←"
+            android:textSize="20sp"
+            style="@style/Widget.Material3.Button.TextButton" />
+
+        <EditText
+            android:id="@+id/searchInput"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:hint="搜索日程或备忘录…"
+            android:inputType="text"
+            android:maxLines="1"
+            android:background="@android:color/transparent"
+            android:textSize="16sp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/searchButton"
+            android:layout_width="56dp"
+            android:layout_height="48dp"
+            android:text="🔍"
+            style="@style/Widget.Material3.Button.TextButton" />
+    </LinearLayout>
+
+    <!-- Tab: 日程 / 备忘录 -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/searchTabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="#FAFAFA">
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="日程" />
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="备忘录" />
+    </com.google.android.material.tabs.TabLayout>
+
+    <!-- 空状态 -->
     <TextView
-        android:layout_width="wrap_content"
+        android:id="@+id/searchEmptyText"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="搜索 - 阶段5实现"
-        android:textSize="18sp"
-        android:layout_gravity="center"
-        android:layout_marginTop="100dp" />
+        android:text="输入关键词开始搜索"
+        android:textSize="14sp"
+        android:textColor="#888888"
+        android:gravity="center"
+        android:padding="32dp"
+        android:visibility="visible" />
+
+    <!-- 搜索结果 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/searchResultList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone" />
+
 </LinearLayout>
