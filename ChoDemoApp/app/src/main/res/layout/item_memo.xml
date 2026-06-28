@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:layout_marginTop="8dp"
+	android:layout_marginBottom="4dp"
+	app:cardCornerRadius="16dp"
+	app:cardElevation="0dp"
+	app:strokeWidth="1dp"
+	app:strokeColor="@color/example_5_page_bg_color"
+	app:cardBackgroundColor="@color/example_5_item_view_bg_color">
+
+	<androidx.constraintlayout.widget.ConstraintLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:padding="12dp">
+
+		<View
+			android:id="@+id/memoColorBar"
+			android:layout_width="4dp"
+			android:layout_height="0dp"
+			android:background="@color/candy_lavender"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toTopOf="parent"
+			app:layout_constraintBottom_toBottomOf="parent" />
+
+		<TextView
+			android:id="@+id/memoTitleText"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_marginStart="12dp"
+			android:ellipsize="end"
+			android:maxLines="1"
+			android:textColor="@color/example_5_text_grey"
+			android:textSize="16sp"
+			android:fontFamily="sans-serif-medium"
+			app:layout_constraintStart_toEndOf="@id/memoColorBar"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintTop_toTopOf="parent"
+			tools:text="未命名" />
+
+		<TextView
+			android:id="@+id/memoContentText"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_marginStart="12dp"
+			android:layout_marginTop="4dp"
+			android:ellipsize="end"
+			android:maxLines="2"
+			android:lineSpacingExtra="2dp"
+			android:textColor="@color/example_5_text_grey_light"
+			android:textSize="13sp"
+			app:layout_constraintStart_toEndOf="@id/memoColorBar"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintTop_toBottomOf="@id/memoTitleText"
+			tools:text="记录一些想法、会议纪要、待办清单……" />
+
+	</androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>
+

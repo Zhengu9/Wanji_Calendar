@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+	<item
+		android:id="@+id/tab_calendar"
+		android:icon="@drawable/ic_tab_calendar"
+		android:title="日程" />
+
+	<item
+		android:id="@+id/tab_assistant"
+		android:icon="@drawable/ic_tab_assistant"
+		android:title="助手" />
+
+	<item
+		android:id="@+id/tab_memo"
+		android:icon="@drawable/ic_tab_memo"
+		android:title="备忘" />
+
+	<item
+		android:id="@+id/tab_lynx"
+		android:icon="@drawable/ic_tab_assistant"
+		android:title="Lynx" />
+
+</menu>

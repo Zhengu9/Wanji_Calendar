@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string-array name="event_type_labels">
+		<item>工作</item>
+		<item>生活</item>
+		<item>学习</item>
+	</string-array>
+
+	<string-array name="event_type_values">
+		<item>WORK</item>
+		<item>LIFE</item>
+		<item>STUDY</item>
+	</string-array>
+</resources>
+

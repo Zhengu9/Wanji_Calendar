@@ -1,0 +1,30 @@
+# ===== Android (ChoDemoApp) =====
+.gradle/
+build/
+*.apk
+*.aab
+*.jks
+*.keystore
+local.properties
+key.properties
+.env
+后端.env
+.idea/
+.kotlin/
+app/build/
+app/release/
+
+# ===== Python (ChronoSync) =====
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+*.db
+wanji/wanji.db
+wanji/wanji_log.txt
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+*.tmp

@@ -1,0 +1,28 @@
+*.iml
+.gradle
+/local.properties
+.env
+后端.env
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+.env
+后端.env
+
+# 敏感文件
+key.properties
+*.jks
+*.keystore
+
+# 调试文件
+questions/
+.vscode/

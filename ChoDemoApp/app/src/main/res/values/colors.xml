@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<color name="black">#FF000000</color>
+	<color name="white">#FFFFFFFF</color>
+
+	<!-- 浅色糖果主题配色 -->
+	<!-- 整体背景：很浅的粉色白 -->
+	<color name="example_5_page_bg_color">#FFF9FE</color>
+	<!-- 卡片背景：纯白 -->
+	<color name="example_5_item_view_bg_color">#FFFFFF</color>
+	<!-- 顶部 AppBar：淡粉色 -->
+	<color name="example_5_toolbar_color">#FFB6C1</color>
+	<!-- 主要文字颜色：深灰 -->
+	<color name="example_5_text_grey">#333333</color>
+	<!-- 次要文字颜色：中灰 -->
+	<color name="example_5_text_grey_light">#777777</color>
+	<!-- 条形标记颜色：糖果橙 / 糖果蓝 -->
+	<color name="brown_700">#FFCC80</color> <!-- 软糖橙色 -->
+	<color name="blue_grey_700">#80DEEA</color> <!-- 薄荷蓝色 -->
+	<color name="candy_lavender">#B39DDB</color> <!-- 薰衣草紫 -->
+	<!-- 选中日期高亮：糖果粉 -->
+	<color name="example_1_selection_color">#FF80AB</color>
+</resources>
